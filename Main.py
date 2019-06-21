@@ -17,20 +17,12 @@ class Chicken:
                                                                                  self.defense, self.speed)
 
 
-# Easter egg chicken
-class SuperChicken(Chicken):
-    def __init__(self):
-        super().__init__()
-        self.name = 'The Chicken Prophet'
-        self.health = 30
-        self.attack = 10
-        self.defense = 5
-        self.speed = 10
-
-
 # Attack function.
 def attack(attacker, defender):
-    # If simulates attack misses:
+    attack_verb = random_attack_verb()
+    initial_defender_health = defender.health
+
+    # Simulates attack misses:
     if randint(0, 40) in range(0, defender.speed):
         print('{} Missed!\n'.format(attacker.name))
         sleep(3.5)
@@ -39,27 +31,21 @@ def attack(attacker, defender):
     elif randint(0, 100) in range(5):
         defender.health -= (2 * attacker.attack)
 
-        # Prevents health falling below 0.
-        if defender.health < 0:
-            defender.health = 0
-
-        print("{0:} scored critical hit against {1:}! {1:}'s health decreased to {2:}\n".format(attacker.name,
-                                                                                                defender.name,
-                                                                                                defender.health))
-        sleep(3.5)
+        attack_verb = "scored a critical hit against"
 
     # Normal hits:
     else:
         defender.health -= abs(attacker.attack - randint(0, defender.defense))
 
-        # Prevents health falling below 0.
-        if defender.health < 0:
-            defender.health = 0
+    # Prevents health falling below 0.
+    if defender.health < 0:
+        defender.health = 0
 
-        print("{0:} {1:} {2:}! {2:}'s health decreased to {3:}!\n".format(attacker.name, random_attack_verb(),
-                                                                          defender.name,
-                                                                          defender.health))
-        sleep(3.5)
+    print("{0:} {1:} {2:}! {2:}'s health decreased from {4:} to {3:}!\n".format(attacker.name, attack_verb,
+                                                                                defender.name,
+                                                                                defender.health,
+                                                                                initial_defender_health))
+    sleep(3.5)
 
 
 # Battle function.
@@ -87,7 +73,6 @@ if __name__ == '__main__':
 
         FirstChicken = Chicken()
         SecondChicken = Chicken()
-        ProphetChicken = SuperChicken()
         PlayerChickenBet = None
 
         # Prevents chicken with the same name being generated.
@@ -127,10 +112,9 @@ if __name__ == '__main__':
         if battle(FirstChicken, SecondChicken) == PlayerChickenBet:
             print('You Won £{}!\n'.format(PlayerBet))
             PlayerMoney += PlayerBet
-            sleep(3.5)
         else:
             print('You Lose £{}!\n'.format(PlayerBet))
             PlayerMoney -= PlayerBet
-            sleep(3.5)
+        sleep(3.5)
 
     print('Game Over!')
