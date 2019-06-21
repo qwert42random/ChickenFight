@@ -1,43 +1,64 @@
 from random import randint
 from time import sleep
-from RandomNamesList import random_name, random_attack
+from RandomNamesList import random_name, random_attack_verb
 
 
+# Chicken class
 class Chicken:
     def __init__(self):
         self.name = random_name()
-        self.health = randint(20, 40)
+        self.health = randint(20, 30)
         self.attack = randint(6, 10)
         self.defense = randint(0, 5)
-        self.speed = randint(1, 10)
+        self.speed = randint(0, 10)
 
     def __str__(self):
-        return f"""Name: {self.name}\nHealth: {self.health}\nAttack: {self.attack}\nDefense: {self.defense}\nSpeed: {
-        self.speed}"""
+        return "Name: {}\nHealth: {}\nAttack: {}\nDefense: {}\nSpeed: {}".format(self.name, self.health, self.attack,
+                                                                                 self.defense, self.speed)
+
+
+# Easter egg chicken
+class SuperChicken(Chicken):
+    def __init__(self):
+        super().__init__()
+        self.name = 'The Chicken Prophet'
+        self.health = 30
+        self.attack = 10
+        self.defense = 5
+        self.speed = 10
 
 
 # Attack function.
 def attack(attacker, defender):
-
-    # If attack misses:
-    if randint(0, 50) in range(0, defender.speed):
+    # If simulates attack misses:
+    if randint(0, 40) in range(0, defender.speed):
         print('{} Missed!\n'.format(attacker.name))
         sleep(3.5)
 
     # If critical hit occurs:
     elif randint(0, 100) in range(5):
         defender.health -= (2 * attacker.attack)
-        print("{} scored critical hit against {}! {}'s health decreased to {}\n".format(attacker.name,
-                                                                                        defender.name, defender.name,
-                                                                                        defender.health))
+
+        # Prevents health falling below 0.
+        if defender.health < 0:
+            defender.health = 0
+
+        print("{0:} scored critical hit against {1:}! {1:}'s health decreased to {2:}\n".format(attacker.name,
+                                                                                                defender.name,
+                                                                                                defender.health))
         sleep(3.5)
 
     # Normal hits:
     else:
         defender.health -= abs(attacker.attack - randint(0, defender.defense))
-        print("{} {} {}! {}'s health decreased to {}!\n".format(attacker.name, random_attack(), defender.name,
-                                                                defender.name,
-                                                                defender.health))
+
+        # Prevents health falling below 0.
+        if defender.health < 0:
+            defender.health = 0
+
+        print("{0:} {1:} {2:}! {2:}'s health decreased to {3:}!\n".format(attacker.name, random_attack_verb(),
+                                                                          defender.name,
+                                                                          defender.health))
         sleep(3.5)
 
 
@@ -51,19 +72,11 @@ def battle(chicken_1, chicken_2):
     while chicken_1.health > 0 and chicken_2.health > 0:
 
         attack(chicken_1, chicken_2)
-        if chicken_2.health <= 0:
-            break
+        chicken_1, chicken_2 = chicken_2, chicken_1
 
-        attack(chicken_2, chicken_1)
-        if chicken_1.health <= 0:
-            break
-
-    if chicken_1.health <= 0:
-        print('{} Wins!'.format(chicken_2.name))
-        return chicken_2
-    else:
-        print('{} Wins!'.format(chicken_1.name))
-        return chicken_1
+    # Prints and returns the winner.
+    print('{} Wins!'.format(chicken_2.name))
+    return chicken_2
 
 
 if __name__ == '__main__':
@@ -74,40 +87,43 @@ if __name__ == '__main__':
 
         FirstChicken = Chicken()
         SecondChicken = Chicken()
+        ProphetChicken = SuperChicken()
+        PlayerChickenBet = None
+
+        # Prevents chicken with the same name being generated.
         while FirstChicken.name == SecondChicken.name:
-            FirstChicken = Chicken()
             SecondChicken = Chicken()
 
         # Player selects their chicken to bet on.
         while True:
-            chicken_choice = str(input(
-                f'''Choose Your Chicken:\n{FirstChicken}\n[1] Select {FirstChicken.name}\n\n{SecondChicken}\n[2] Select {SecondChicken.name}\n'''))
+            chicken_choice = input(
+                "Choose Your Chicken:\n{}\n[1] Choose {}\n\n{}\n[2] Choose {}\n".format(FirstChicken, FirstChicken.name,
+                                                                                        SecondChicken,
+                                                                                        SecondChicken.name))
             if chicken_choice == '1':
                 PlayerChickenBet = FirstChicken
                 break
-            if chicken_choice == '2':
+            elif chicken_choice == '2':
                 PlayerChickenBet = SecondChicken
                 break
             else:
                 print('Invalid Selection')
                 sleep(2)
-                continue
 
         # Deals with the player's betting.
-        PlayerBet = -1
-        while PlayerBet > PlayerMoney or PlayerBet < 0:
+        PlayerBet = None
+        while True:
             try:
                 PlayerBet = int(input("Place bet under £{}: £".format(PlayerMoney)))
+                if PlayerBet < 0 or PlayerBet > PlayerMoney:
+                    print("Invalid Amount")
+                else:
+                    break
             except ValueError:
                 print("Invalid Amount")
-                sleep(2)
-                continue
-            if PlayerBet > PlayerMoney:
-                print("Insufficient Funds")
-                sleep(2)
                 continue
 
-        # Commence Battle:
+        # Commence battle and determine winner:
         if battle(FirstChicken, SecondChicken) == PlayerChickenBet:
             print('You Won £{}!\n'.format(PlayerBet))
             PlayerMoney += PlayerBet
